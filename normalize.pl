@@ -15,10 +15,9 @@ my $fileName = $ARGV[0];
 #入力テキストを1行ずつ処理する
 open(IN,"<:encoding(utf-8)",$fileName) or die "$!:$fileName";
 while (my $originText = <IN>) {
-    chomp($originText);
 
-    #元テキスト
-    my $originText = $ITEM[1];
+    #改行コード削除
+    chomp($originText);
 
     #Unicode正規化
     my $normalText = NFKC($originText) ;
