@@ -37,8 +37,6 @@ while (my $originText = <IN>) {
     #5文字未満のtweetはノイズとして無視
     if ( length($normalText) < 5 ) { next; }
 
-    #記号が4割以上だったら無視
-
     #特殊な文字列や記号が4割以上だったら無視
     if ( isSpecialText($normalText,0.4) == 1 ) { next; }
 
