@@ -1,26 +1,27 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
-use strict;
-use Unicode::Normalize;
 use utf8;
-use Encode qw(encode_utf8 decode_utf8);
+use strict;
+use warnings;
 binmode STDOUT,":utf8";
+
+use Unicode::Normalize;
 
 #常用文字の正規表現コンパイル
 my $basicCharReg = qr/\p{InHiragana}|\p{InKatakana}|[亜-腕]/;
 
 #tweetテキストが書かれた入力ファイル
-my $fileName = $ARGV[0];
+my $fileName = shift or die "usage: $0 <textfile>";
 
 #入力テキストを1行ずつ処理する
-open(IN,"<:encoding(utf-8)",$fileName) or die "$!:$fileName";
-while (my $originText = <IN>) {
+open my $fh, "<:encoding(utf-8)", $fileName or die "$!:$fileName";
+while (my $originText = <$fh>) {
 
     #改行コード削除
-    chomp($originText);
+    chomp $originText;
 
     #Unicode正規化
-    my $normalText = NFKC($originText) ;
+    my $normalText = NFKC($originText);
 
     #先頭、末尾の空白を削除 (trim)
     $normalText = trim($normalText);
@@ -43,11 +44,11 @@ while (my $originText = <IN>) {
     print $normalText . "\n";
 
 }
-close(IN);
+close $fh;
 
 #入力テキストの先頭・末尾の空白（の連続）を削除する
 sub trim{
-    my $text = $_[0];
+    my $text = shift;
     $text =~ s/^\s*//;
     $text =~ s/\s*$//;
     return $text;
@@ -55,7 +56,7 @@ sub trim{
 
 #tweet先頭のユーザIDを削除する
 sub deleteResID{
-    my $text = $_[0];
+    my $text = shift;
     $text =~ s/^\@[a-zA-Z0-9_]*\s?//;
     return $text;
 }
@@ -63,8 +64,7 @@ sub deleteResID{
 #ひらがなカタカナ、及び第一水準
 #上記に含まれない文字列がテキストの4割以上になっているか否か
 sub isSpecialText{
-    my $text = $_[0];
-    my $threshold = $_[1] ;
+    my ($text, $threshold) = @_;
     my $fullCharNum = length($text);
     $text =~ s/$basicCharReg//g;
     my $specialCharNum = length($text);
@@ -80,14 +80,14 @@ sub isSpecialText{
 
 #ハッシュタグ(日本語含む)を削除
 sub deleteHashTag{
-    my $text = $_[0];
+    my $text = shift;
     $text =~ s/\#[^ ]* ?//sg;
     return $text;
 }
 
 #入力テキストからURL情報を削除する
-sub deleteURL{
-    my $text = $_[0];
+sub deleteURL {
+    my $text = shift;
     $text =~ s/https?:\/\/\p{InBasicLatin}*//sg;
     return $text;
 }
